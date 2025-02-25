@@ -13,11 +13,11 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 function App() {
   return (
     <Router>
-      <div>
+      <div className='w-[100vw] h-[100vh]'>
         <Navbar />
         <div className="container mt-4">
           <Routes>
-            <Route path="/projects" element={<ProjectList />} />
+            <Route path="/" element={<ProjectList />} />
             <Route path="/projects/create" element={<ProjectCreate />} />
             <Route path="/projects/edit/:id" element={<ProjectEdit />} />
             <Route path="/persons" element={<PersonList />} />

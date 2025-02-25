@@ -13,7 +13,7 @@ function ProjectCreate() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     await axios.post('http://localhost:8000/api/projets', project)
-    navigate('/projects')
+    navigate('/')
   }
 
   const handleChange = (e) => {

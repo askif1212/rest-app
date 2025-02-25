@@ -11,6 +11,6 @@ class Personne extends Model
 
     public function projet()
     {
-        return $this->belongsToMany(Projet::class, "affectations", "projet_id", "personnes_id");
+        return $this->belongsToMany(Projet::class, "affectations", "personnes_id", "projet_id");
     }
 }

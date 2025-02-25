@@ -1,33 +1,31 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import axios from 'axios'
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
 function AffectationList() {
-  const [affectations, setAffectations] = useState([])
+  const [affectations, setAffectations] = useState([]);
 
   useEffect(() => {
-    loadAffectations()
-  }, [])
+    loadAffectations();
+  }, []);
 
   const loadAffectations = async () => {
-    const response = await axios.get('http://localhost:8000/api/affectation')
-    setAffectations(response.data.data)
-  }
+    const response = await axios.get("http://localhost:8000/api/affectation");
+    setAffectations(response.data.data);
+  };
 
   const handleDelete = async (idpr, idp) => {
-    if (window.confirm('Are you sure you want to delete this affectation?')) {
-      await axios.delete('http://localhost:8000/api/affectation', {
-        data: { idpr, idp }
-      })
-      loadAffectations()
+    console.log(idpr,idp)
+    if (window.confirm("Are you sure you want to delete this affectation?")) {
+      await axios.post('http://localhost:8000/api/affectation/delete', { idpr: idpr, idp: idp })
+      loadAffectations();
     }
-  }
+  };
 
   return (
     <div>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2>Project Affectations</h2>
-        <Link to="/affectations/create" className="btn btn-primary">New Affectation</Link>
       </div>
       <table className="table">
         <thead>
@@ -41,10 +39,12 @@ function AffectationList() {
           {affectations.map((affectation, index) => (
             <tr key={index}>
               <td>{affectation.projet_id}</td>
-              <td>{affectation.personne_id}</td>
+              <td>{affectation.personnes_id}</td>
               <td>
-                <button 
-                  onClick={() => handleDelete(affectation.projet_id, affectation.personne_id)} 
+                <button
+                  onClick={() =>
+                    handleDelete(affectation.projet_id, affectation.personnes_id)
+                  }
                   className="btn btn-sm btn-danger"
                 >
                   Delete
@@ -55,7 +55,7 @@ function AffectationList() {
         </tbody>
       </table>
     </div>
-  )
+  );
 }
 
-export default AffectationList
+export default AffectationList;

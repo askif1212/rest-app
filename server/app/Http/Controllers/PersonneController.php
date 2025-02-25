@@ -19,7 +19,10 @@ class PersonneController extends Controller
 
     public function show($id)
     {
-        $data = Personne::find($id);
+        $data = Personne::with(['projet' => function ($query) {
+            $query->select('projets.id', 'intitule', 'dateDebut', 'duree');
+        }])->findOrFail($id);
+
         return response()->json([
             "data" => $data,
             "status" => 200
@@ -61,6 +64,14 @@ class PersonneController extends Controller
     public function destroy($id)
     {
         $personne = Personne::findOrFail($id);
+
+        if ($personne->projet()->get()->count() > 0) {
+            return response()->json([
+                "message" => "Impossible de supprimer cette personne car elle est affectée à des projets",
+                "status" => 400
+            ], 400);
+        }
+
         $personne->delete();
         return response()->json([
             "message" => "La personne avec l'id $id a ete bien supprimee",
@@ -74,14 +85,21 @@ class PersonneController extends Controller
         $validatedData = $request->validate([
             'projet_id' => 'required|exists:projets,id',
         ]);
-        
-        $projet = Projet::find($validatedData['projet_id']);
-        $personne->projet()->attach($projet);
 
-        return response()->json([
-            "status" => 200,
-            "message" => "La personne avec l'id $personneId a ete associee au projet avec l'id {$projet->id}"
-        ]);
+        try {
+            $affectation = new AffectationController();
+            $affectationRequest = new Request([
+                'idpr' => $validatedData['projet_id'],
+                'idp' => $personneId
+            ]);
+            
+            return $affectation->store($affectationRequest);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status" => 400,
+                "message" => "Error creating affectation: " . $e->getMessage()
+            ], 400);
+        }
     }
 
     public function detacherProjet(Request $request, $personneId)
@@ -90,13 +108,20 @@ class PersonneController extends Controller
         $validatedData = $request->validate([
             'projet_id' => 'required|exists:projets,id',
         ]);
-        
-        $projet = Projet::find($validatedData['projet_id']);
-        $personne->projet()->detach($projet);
 
-        return response()->json([
-            "status" => 200,
-            "message" => "La personne avec l'id $personneId a ete detachee du projet avec l'id {$projet->id}"
-        ]);
+        try {
+            $affectation = new AffectationController();
+            $affectationRequest = new Request([
+                'idpr' => $validatedData['projet_id'],
+                'idp' => $personneId
+            ]);
+            
+            return $affectation->destroy($affectationRequest);
+        } catch (\Exception $e) {
+            return response()->json([
+                "status" => 400,
+                "message" => "Error removing affectation: " . $e->getMessage()
+            ], 400);
+        }
     }
 }
